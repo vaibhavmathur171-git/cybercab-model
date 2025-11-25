@@ -206,10 +206,79 @@ with c_sens:
     
     # --- OPTIMIZED VECTORIZED CALCULATION (INSTANT UPDATES) ---
     
-    # 1. Define Axes corresponding to the heatmap visual
-    X_util_axis = np.array(list(range(30, 85, 5))) # X-axis values
+    # 1. Define Axes corresponding to the heatmap visual using np.arange/np.array for efficiency
+    X_util_axis = np.arange(30, 85, 5) # X-axis values: 30, 35, ..., 80
     Y_price_axis = np.array([1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]) # Y-axis values
 
-    # 2. Create 2D Meshgrids
+    # 2. Create 2D Meshgrids for vectorized operations
     # U_grid varies across columns (x-axis), P_grid varies across rows (y-axis)
-    U_grid, P_grid = np.meshgrid(X_util_axis,
+    U_grid, P_grid = np.meshgrid(X_util_axis, Y_price_axis)
+
+    # 3. Perform Vectorized Math on the entire grid at once
+    # Paid Miles Matrix
+    PM_grid = hours_mo * (U_grid / 100.0) * avg_speed
+    
+    # Total Miles Matrix (Robust division handling for zero utilization)
+    TM_grid = np.divide(PM_grid, (U_grid / 100.0), out=np.zeros_like(PM_grid), where=(U_grid > 0))
+
+    # Gross Revenue Matrix
+    GR_grid = PM_grid * P_grid
+    
+    # Net Revenue Matrix (after Tesla cut)
+    NR_grid = GR_grid * (1 - (platform_fee / 100.0))
+
+    # Variable Costs Matrix (Tires + Energy based on TOTAL miles)
+    VC_grid = TM_grid * (tire_cost + energy_cost)
+
+    # Total Costs Matrix (Variable + broadcasted fixed costs & debt)
+    # Fixed costs and debt are scalars, so they broadcast automatically across the grid
+    TC_grid = VC_grid + fixed_opex_car + monthly_debt_car
+
+    # Final Profit Matrix (Z-data)
+    Z_grid = NR_grid - TC_grid
+
+    # 4. Plot the resulting Z_grid
+    fig_heat = go.Figure(data=go.Heatmap(
+        z=Z_grid, 
+        x=[f"{x}%" for x in X_util_axis], 
+        y=[f"${y:.2f}" for y in Y_price_axis],
+        colorscale='RdBu', zmid=0, texttemplate="$%{z:.0f}", textfont={"size":11, "family": "Roboto"}
+    ))
+    fig_heat.update_layout(
+        xaxis_title="Paid Utilization %", yaxis_title="Price per Mile",
+        template="plotly_dark", height=450, margin=dict(l=0, r=0, t=30, b=0),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font={'color': '#e0e0e0', 'family': 'Roboto'}
+    )
+    st.plotly_chart(fig_heat, use_container_width=True)
+
+# --- DEEP THINK CONTEXT SECTION ---
+st.markdown("---")
+st.header("📚 Deep Think: The Research Behind the Numbers")
+st.markdown("Why are the default costs set where they are? Based on industry analysis of rideshare and fleet operations.")
+
+with st.expander("1. The 'Vomit Tax' (Cleaning & Maintenance) - Why $400/mo?", expanded=True):
+    st.markdown("""
+    * **Reality:** A robotaxi cannot clean itself. Riders will leave trash, spill drinks, or worse.
+    * **Benchmark:** Professional fleet detailing costs ~$100-$150 for a deep clean. A robotaxi will likely need a weekly deep clean plus daily wipe-downs.
+    * **The Cost:** 4x weekly cleans ($400) + daily sanitization labor is a realistic, perhaps even conservative, estimate for maintaining a premium service.
+    """)
+
+with st.expander("2. Commercial Insurance - Why $250/mo?", expanded=True):
+    st.markdown("""
+    * **Reality:** Your personal auto policy **will not cover** a vehicle used for commercial rideshare, especially one without a driver.
+    * **Benchmark:** Commercial fleet insurance for taxis or limos typically runs $3,000 - $6,000 per year per vehicle ($250 - $500/mo) depending on location and coverage limits.
+    * **The Risk:** While autonomous cars may crash less, the *liability* for the few crashes they do have will be enormous, keeping premiums high initially.
+    """)
+
+with st.expander("3. Tires & Energy - Why $0.14/mile?", expanded=True):
+    st.markdown("""
+    * **Tires ($0.06/mi):** EVs are heavier and have higher torque, leading to faster tire wear. A set of 4 tires for a Tesla can cost $1,000+ and may only last 25,000 miles in high-duty city driving.
+    * **Energy ($0.08/mi):** While home charging is cheap (~$0.15/kWh), a 24/7 robotaxi will rely heavily on Superchargers (~$0.35/kWh) to stay on the road. The blended cost per mile will be higher than a personal user's.
+    """)
+
+with st.expander("4. Utilization & Deadhead - The Silent Killer", expanded=True):
+    st.markdown("""
+    * **Reality:** A car only makes money when a passenger is inside. Driving to pick someone up (deadhead) costs money but earns zero.
+    * **Benchmark:** Human Uber/Lyft drivers average a **50-60% paid utilization rate**. The rest of the time they are waiting or driving empty.
+    * **The Math:** At 50% utilization, for every 1 paid mile, the car drives 2 total miles. Your variable costs (tires, energy) double relative to your revenue.
+    """)
