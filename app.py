@@ -5,70 +5,80 @@ import plotly.graph_objects as go
 import numpy as np
 
 # --- PAGE CONFIGURATION ---
-st.set_page_config(page_title="Cybercab Fleet Commander", layout="wide", page_icon="🚔")
+st.set_page_config(page_title="Robotaxi Fleet Commander", layout="wide", page_icon="🚔")
 
-# --- CUSTOM CSS FOR "DELIGHTFUL" UI ---
+# --- CUSTOM CSS FOR "TITANIUM" UI ---
 st.markdown("""
 <style>
-    /* Modern Dark Theme */
-    .stApp { background-color: #0a0a0a; color: #e0e0e0; font-family: 'Inter', sans-serif; }
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
     
-    /* KPI Cards */
+    /* Titanium Dark Theme */
+    .stApp { background-color: #0E1117; color: #E0E0E0; font-family: 'Roboto', sans-serif; }
+    
+    /* KPI Cards - Minimalist Glass */
     div[data-testid="metric-container"] {
-        background-color: #1a1a1a;
-        border: 1px solid #333;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         transition: all 0.3s ease;
     }
     div[data-testid="metric-container"]:hover {
-        border-color: #E31937;
-        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-4px);
     }
     
     /* Sliders & Inputs */
-    .stSlider > div > div > div > div { background-color: #E31937; }
-    .stNumberInput input { background-color: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 8px; }
+    .stSlider > div > div > div > div { background-color: #FF3B30; }
+    .stNumberInput input { background-color: #1C1F26; color: #fff; border: 1px solid #333; border-radius: 8px; }
     
     /* Headers & Text */
-    h1, h2, h3 { font-weight: 700; letter-spacing: -0.5px; }
-    h1 { color: #E31937; }
-    h2 { border-bottom: 2px solid #333; padding-bottom: 15px; margin-top: 30px; }
-    .highlight { color: #E31937; font-weight: bold; }
+    h1, h2, h3 { font-weight: 700; letter-spacing: 0.5px; color: #ffffff; text-transform: uppercase; }
+    h1 { font-size: 2.5em; margin-bottom: 0; }
+    h2 { border-bottom: 1px solid #333; padding-bottom: 15px; margin-top: 50px; font-size: 1.5em; }
+    .stCaption { color: #888; font-size: 0.9em; }
     
-    /* Expanders */
-    .streamlit-expanderHeader { background-color: #1a1a1a; border-radius: 8px; }
+    /* Professional Expanders */
+    .streamlit-expanderHeader { background-color: #1C1F26; border-radius: 8px; color: #ffffff !important; font-weight: 600; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .streamlit-expanderContent { background-color: #13161D; border-radius: 0 0 8px 8px; padding: 24px; border: 1px solid rgba(255, 255, 255, 0.1); border-top: none; }
+    
+    /* Custom Profit/Loss Boxes */
+    .profit-box { background: rgba(0, 230, 118, 0.08); border: 1px solid #00E676; padding: 24px; border-radius: 16px; color: #00E676; font-size: 1.2em; display: flex; align-items: center; }
+    .loss-box { background: rgba(255, 59, 48, 0.08); border: 1px solid #FF3B30; padding: 24px; border-radius: 16px; color: #FF3B30; font-size: 1.2em; display: flex; align-items: center; }
+    .box-icon { font-size: 1.8em; margin-right: 20px; }
 </style>
 """, unsafe_allow_html=True)
 
 # --- HEADER ---
-c1, c2 = st.columns([3, 1])
+c1, c2 = st.columns([1, 6])
 with c1:
-    st.title("🚔 Cybercab Fleet Commander")
-    st.markdown("### The Business of Autonomous Mobility")
+    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Tesla_Motors.svg/800px-Tesla_Motors.svg.png", width=100)
 with c2:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/e/e8/Tesla_logo.png", width=80)
+    st.markdown("<h1>Robotaxi Fleet Commander</h1>", unsafe_allow_html=True)
+    st.caption("The Definitive Business Model for Autonomous Mobility")
 
 st.divider()
 
 # --- SIDEBAR: CONTROL CENTER ---
 with st.sidebar:
     st.header("🎛️ Fleet Controls")
+    st.caption("Adjust inputs to model your fleet's profitability.")
     
     # 1. Fleet Scale
     with st.expander("📈 Fleet Scale", expanded=True):
-        num_cars = st.number_input("Number of Cybercabs", value=1, min_value=1, step=1, 
-            help="Multiplies all CapEx, OpEx, and Revenue.")
+        num_cars = st.number_input("Number of Robotaxis", value=1, min_value=1, step=1, 
+            help="Multiplies all Capital, Operating, and Revenue figures.")
 
     # 2. Revenue Drivers
     with st.expander("💰 Revenue Assumptions", expanded=True):
         price_per_mile = st.slider("Price Charged ($/mi)", 0.50, 3.50, 1.60, step=0.10,
-            help="Uber is ~$2.50. Robotaxi target is $1.00-$2.00.")
+            help="Current Uber avg is ~$2.50. Robotaxi target is $1.00-$2.00.")
         paid_utilization = st.slider("Paid Utilization (%)", 20, 80, 55, step=5,
             help="% of time car has a paying passenger. Uber avg is 50-60%.")
         hours_active = st.slider("Hours Online / Day", 8, 24, 16, step=2,
-            help="Total time car is available for jobs (includes deadhead).")
+            help="Total time car is available for jobs (includes deadhead & charging).")
 
     # 3. The Tesla Cut
     with st.expander("🤝 Platform Fees", expanded=True):
@@ -89,7 +99,7 @@ with st.sidebar:
         energy_cost = st.number_input("Energy ($/mi)", value=0.08, format="%.2f", step=0.01,
             help="Mix of home charging ($0.15/kWh) and Supercharging ($0.35/kWh).")
 
-    # 5. Capital Costs (UPDATED SECTION)
+    # 5. Capital Costs
     with st.expander("🏦 Loan & CapEx (Per Car)", expanded=True):
         car_price = st.number_input("Vehicle Price ($)", value=29000, step=1000)
         down_payment = st.number_input("Down Payment ($)", value=5000, step=500)
@@ -153,16 +163,25 @@ kpi2.metric("Total Fleet Costs", f"${fleet_total_costs:,.0f}", "OpEx + Debt Paym
 kpi3.metric("Total Miles Driven", f"{fleet_total_miles:,.0f}", f"{(deadhead_miles_mo_per_car*num_cars):,.0f} Empty")
 kpi4.metric("Net Fleet Cash Flow", f"${fleet_cash_flow:,.0f}", delta_color="normal" if fleet_cash_flow > 0 else "inverse")
 
+st.write("") # Spacer
+
 if fleet_cash_flow > 0:
-    st.success(f"✅ **Generating Cash:** Your fleet is producing **${fleet_cash_flow*12:,.0f}** in annual profit (pre-tax).")
+    st.markdown(f"""<div class='profit-box'>
+        <span class='box-icon'>✅</span>
+        <div><strong>Generating Cash:</strong> Your fleet is producing <span style='font-size: 1.2em; font-weight: 700;'>${fleet_cash_flow*12:,.0f}</span> in annual profit (pre-tax).</div>
+    </div>""", unsafe_allow_html=True)
 else:
-    st.error(f"⚠️ **Burning Cash:** Your fleet is losing **${abs(fleet_cash_flow):,.0f}** per month. Adjust pricing or utilization.")
+    st.markdown(f"""<div class='loss-box'>
+        <span class='box-icon'>⚠️</span>
+        <div><strong>Burning Cash:</strong> Your fleet is losing <span style='font-size: 1.2em; font-weight: 700;'>${abs(fleet_cash_flow):,.0f}</span> per month. Adjust pricing or utilization.</div>
+    </div>""", unsafe_allow_html=True)
 
 # 2. Visual Breakdown & Sensitivity
+st.markdown("---")
 c_viz, c_sens = st.columns([1, 1])
 
 with c_viz:
-    st.subheader("💸 Per-Car Unit Economics")
+    st.subheader("💸 Where does the money go? (Single Car)")
     # Sankey Waterfall
     fig_waterfall = go.Figure(go.Waterfall(
         name = "20", orientation = "v",
@@ -172,44 +191,51 @@ with c_viz:
         text = [f"${gross_rev_car:,.0f}", f"-${platform_cut_car:,.0f}", f"-${var_opex_car:,.0f}", f"-${fixed_opex_car:,.0f}", f"-${monthly_debt_car:,.0f}", f"${cash_flow_car:,.0f}"],
         y = [gross_rev_car, -platform_cut_car, -var_opex_car, -fixed_opex_car, -monthly_debt_car, cash_flow_car],
         connector = {"line":{"color":"#555"}},
-        decreasing = {"marker":{"color":"#E31937"}},
-        increasing = {"marker":{"color":"#00C853"}},
+        decreasing = {"marker":{"color":"#FF3B30"}},
+        increasing = {"marker":{"color":"#00E676"}},
         totals = {"marker":{"color":"#2196F3"}}
     ))
-    fig_waterfall.update_layout(title="Where does the money go? (Single Car)", template="plotly_dark", height=400, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+    fig_waterfall.update_layout(template="plotly_dark", height=450, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font={'color': '#e0e0e0', 'family': 'Roboto'})
     st.plotly_chart(fig_waterfall, use_container_width=True)
 
 with c_sens:
-    st.subheader("🧠 Deep Think: Profit Sensitivity")
-    st.markdown("How **Price** and **Utilization** affect Per-Car Monthly Profit.")
+    st.subheader("⚖️ Breakeven Analysis")
+    st.markdown("Revenue vs. Costs at different Utilization rates (based on current Price).")
     
-    # Real-time Heatmap Calc
-    x_util = list(range(30, 85, 5))
-    y_price = [1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]
-    z_data = []
-    for p in y_price:
-        row = []
-        for u in x_util:
-            # Re-run core logic for matrix
-            pm = (hours_mo * (u/100) * avg_speed)
-            tm = pm / (u/100)
-            gr = pm * p
-            nr = gr * (1 - (platform_fee/100))
-            vc = tm * (tire_cost + energy_cost)
-            tc = vc + fixed_opex_car + monthly_debt_car
-            row.append(nr - tc)
-        z_data.append(row)
+    # --- NEW BREAKEVEN LINE CHART ---
+    # 1. Define Utilization Range for X-axis
+    util_range = np.arange(20, 85, 5)
 
-    fig_heat = go.Figure(data=go.Heatmap(
-        z=z_data, x=[f"{x}%" for x in x_util], y=[f"${y:.2f}" for y in y_price],
-        colorscale='RdBu', zmid=0, texttemplate="$%{z:.0f}", textfont={"size":10}
-    ))
-    fig_heat.update_layout(
-        xaxis_title="Paid Utilization %", yaxis_title="Price per Mile",
-        template="plotly_dark", height=400, margin=dict(l=0, r=0, t=30, b=0),
-        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'
+    # 2. Calculate Revenue Line based on CURRENT price_per_mile
+    # Paid Miles = Hours * (Util/100) * Speed
+    # Revenue = Paid Miles * Price * (1 - Tesla Fee)
+    paid_miles_line = hours_mo * (util_range / 100.0) * avg_speed
+    gross_rev_line = paid_miles_line * price_per_mile
+    net_rev_line = gross_rev_line * (1 - (platform_fee / 100.0))
+
+    # 3. Calculate Total Cost Line based on CURRENT inputs
+    # Total Miles = Paid Miles / (Util/100)
+    total_miles_line = np.divide(paid_miles_line, (util_range / 100.0), out=np.zeros_like(paid_miles_line), where=(util_range > 0))
+    
+    variable_cost_line = total_miles_line * (tire_cost + energy_cost)
+    fixed_cost_total = fixed_opex_car + monthly_debt_car # Loan + Insurance + Cleaning etc.
+    total_cost_line = variable_cost_line + fixed_cost_total
+
+    # 4. Create Plotly Line Chart
+    fig_breakeven = go.Figure()
+
+    # Revenue Line (Green)
+    fig_breakeven.add_trace(go.Scatter(x=util_range, y=net_rev_line, mode='lines+markers', name='Net Revenue', line=dict(color='#00E676', width=3)))
+    # Cost Line (Red)
+    fig_breakeven.add_trace(go.Scatter(x=util_range, y=total_cost_line, mode='lines+markers', name='Total Costs', line=dict(color='#FF3B30', width=3)))
+
+    fig_breakeven.update_layout(
+        xaxis_title="Paid Utilization %", yaxis_title="Monthly $ (Per Car)",
+        template="plotly_dark", height=450, margin=dict(l=0, r=0, t=30, b=0),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font={'color': '#e0e0e0', 'family': 'Roboto'},
+        legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, bgcolor='rgba(0,0,0,0.5)')
     )
-    st.plotly_chart(fig_heat, use_container_width=True)
+    st.plotly_chart(fig_breakeven, use_container_width=True)
 
 # --- DEEP THINK CONTEXT SECTION ---
 st.markdown("---")
