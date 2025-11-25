@@ -7,38 +7,37 @@ import numpy as np
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="Cybercab Fleet Commander", layout="wide", page_icon="🚔")
 
-# --- CUSTOM CSS FOR "EXECUTIVE" UI ---
+# --- CUSTOM CSS FOR "TITANIUM" UI ---
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
     
-    /* Modern Dark Theme */
-    .stApp { background-color: #0E1117; color: #FAFAFA; font-family: 'Inter', sans-serif; }
+    /* Titanium Dark Theme */
+    .stApp { background-color: #0E1117; color: #E0E0E0; font-family: 'Roboto', sans-serif; }
     
-    /* KPI Cards - Glassmorphism */
+    /* KPI Cards - Minimalist Glass */
     div[data-testid="metric-container"] {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         padding: 24px;
         border-radius: 16px;
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         transition: all 0.3s ease;
     }
     div[data-testid="metric-container"]:hover {
-        border-color: #E31937;
+        border-color: rgba(255, 255, 255, 0.2);
         transform: translateY(-4px);
-        box-shadow: 0 12px 40px 0 rgba(227, 25, 55, 0.2);
     }
     
     /* Sliders & Inputs */
-    .stSlider > div > div > div > div { background-color: #E31937; }
+    .stSlider > div > div > div > div { background-color: #FF3B30; }
     .stNumberInput input { background-color: #1C1F26; color: #fff; border: 1px solid #333; border-radius: 8px; }
     
     /* Headers & Text */
-    h1, h2, h3 { font-weight: 700; letter-spacing: -0.5px; color: #ffffff; }
-    h1 span { color: #E31937; } /* Cybercab red */
-    h2 { border-bottom: 1px solid #333; padding-bottom: 15px; margin-top: 40px; font-size: 1.5em; }
+    h1, h2, h3 { font-weight: 700; letter-spacing: 0.5px; color: #ffffff; text-transform: uppercase; }
+    h1 { font-size: 2.5em; margin-bottom: 0; }
+    h2 { border-bottom: 1px solid #333; padding-bottom: 15px; margin-top: 50px; font-size: 1.5em; }
     .stCaption { color: #888; font-size: 0.9em; }
     
     /* Professional Expanders */
@@ -46,23 +45,19 @@ st.markdown("""
     .streamlit-expanderContent { background-color: #13161D; border-radius: 0 0 8px 8px; padding: 24px; border: 1px solid rgba(255, 255, 255, 0.1); border-top: none; }
     
     /* Custom Profit/Loss Boxes */
-    .profit-box { background: rgba(0, 230, 118, 0.1); border: 1px solid #00E676; padding: 20px; border-radius: 12px; color: #00E676; font-size: 1.1em; display: flex; align-items: center; }
-    .loss-box { background: rgba(255, 23, 68, 0.1); border: 1px solid #FF1744; padding: 20px; border-radius: 12px; color: #FF1744; font-size: 1.1em; display: flex; align-items: center; }
-    .box-icon { font-size: 1.8em; margin-right: 15px; }
+    .profit-box { background: rgba(0, 230, 118, 0.08); border: 1px solid #00E676; padding: 24px; border-radius: 16px; color: #00E676; font-size: 1.2em; display: flex; align-items: center; }
+    .loss-box { background: rgba(255, 59, 48, 0.08); border: 1px solid #FF3B30; padding: 24px; border-radius: 16px; color: #FF3B30; font-size: 1.2em; display: flex; align-items: center; }
+    .box-icon { font-size: 1.8em; margin-right: 20px; }
 </style>
 """, unsafe_allow_html=True)
 
 # --- HEADER ---
-c1, c2, c3 = st.columns([1, 4, 2])
+c1, c2 = st.columns([1, 6])
 with c1:
-    # Official Tesla Logo
     st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Tesla_Motors.svg/800px-Tesla_Motors.svg.png", width=100)
 with c2:
-    st.markdown("<h1><span>Cybercab</span> Fleet Commander</h1>", unsafe_allow_html=True)
-    st.markdown("### The Business Model of Autonomous Mobility")
-with c3:
-    # Public domain image of Cybertruck (closest proxy)
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Tesla_Cybertruck_Franz_von_Holzhausen.jpg/640px-Tesla_Cybertruck_Franz_von_Holzhausen.jpg", width=250)
+    st.markdown("<h1>Cybercab Fleet Commander</h1>", unsafe_allow_html=True)
+    st.caption("The Definitive Business Model for Autonomous Mobility")
 
 st.divider()
 
@@ -196,11 +191,11 @@ with c_viz:
         text = [f"${gross_rev_car:,.0f}", f"-${platform_cut_car:,.0f}", f"-${var_opex_car:,.0f}", f"-${fixed_opex_car:,.0f}", f"-${monthly_debt_car:,.0f}", f"${cash_flow_car:,.0f}"],
         y = [gross_rev_car, -platform_cut_car, -var_opex_car, -fixed_opex_car, -monthly_debt_car, cash_flow_car],
         connector = {"line":{"color":"#555"}},
-        decreasing = {"marker":{"color":"#FF1744"}},
+        decreasing = {"marker":{"color":"#FF3B30"}},
         increasing = {"marker":{"color":"#00E676"}},
         totals = {"marker":{"color":"#2196F3"}}
     ))
-    fig_waterfall.update_layout(template="plotly_dark", height=450, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font={'color': '#e0e0e0', 'family': 'Inter'})
+    fig_waterfall.update_layout(template="plotly_dark", height=450, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font={'color': '#e0e0e0', 'family': 'Roboto'})
     st.plotly_chart(fig_waterfall, use_container_width=True)
 
 with c_sens:
@@ -226,12 +221,12 @@ with c_sens:
 
     fig_heat = go.Figure(data=go.Heatmap(
         z=z_data, x=[f"{x}%" for x in x_util], y=[f"${y:.2f}" for y in y_price],
-        colorscale='RdBu', zmid=0, texttemplate="$%{z:.0f}", textfont={"size":11, "family": "Inter"}
+        colorscale='RdBu', zmid=0, texttemplate="$%{z:.0f}", textfont={"size":11, "family": "Roboto"}
     ))
     fig_heat.update_layout(
         xaxis_title="Paid Utilization %", yaxis_title="Price per Mile",
         template="plotly_dark", height=450, margin=dict(l=0, r=0, t=30, b=0),
-        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font={'color': '#e0e0e0', 'family': 'Inter'}
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font={'color': '#e0e0e0', 'family': 'Roboto'}
     )
     st.plotly_chart(fig_heat, use_container_width=True)
 
