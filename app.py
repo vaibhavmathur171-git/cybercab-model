@@ -7,76 +7,83 @@ import numpy as np
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="Cybercab Fleet Commander", layout="wide", page_icon="🚔")
 
-# --- CUSTOM CSS FOR "PROFESSIONAL" UI ---
+# --- CUSTOM CSS FOR "EXECUTIVE" UI ---
 st.markdown("""
 <style>
-    /* Professional Dark Theme */
-    .stApp { background-color: #121212; color: #e0e0e0; font-family: 'Inter', sans-serif; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
     
-    /* KPI Cards - High Contrast */
+    /* Modern Dark Theme */
+    .stApp { background-color: #0E1117; color: #FAFAFA; font-family: 'Inter', sans-serif; }
+    
+    /* KPI Cards - Glassmorphism */
     div[data-testid="metric-container"] {
-        background-color: #1E1E1E;
-        border: 1px solid #333;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         transition: all 0.3s ease;
     }
     div[data-testid="metric-container"]:hover {
         border-color: #E31937;
-        transform: translateY(-2px);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px 0 rgba(227, 25, 55, 0.2);
     }
     
     /* Sliders & Inputs */
     .stSlider > div > div > div > div { background-color: #E31937; }
-    .stNumberInput input { background-color: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 8px; }
+    .stNumberInput input { background-color: #1C1F26; color: #fff; border: 1px solid #333; border-radius: 8px; }
     
     /* Headers & Text */
     h1, h2, h3 { font-weight: 700; letter-spacing: -0.5px; color: #ffffff; }
     h1 span { color: #E31937; } /* Cybercab red */
-    h2 { border-bottom: 2px solid #333; padding-bottom: 15px; margin-top: 30px; }
+    h2 { border-bottom: 1px solid #333; padding-bottom: 15px; margin-top: 40px; font-size: 1.5em; }
+    .stCaption { color: #888; font-size: 0.9em; }
     
     /* Professional Expanders */
-    .streamlit-expanderHeader { background-color: #2d2d2d; border-radius: 8px; color: #ffffff !important; font-weight: 600; }
-    .streamlit-expanderContent { background-color: #1E1E1E; border-radius: 0 0 8px 8px; padding: 20px; }
+    .streamlit-expanderHeader { background-color: #1C1F26; border-radius: 8px; color: #ffffff !important; font-weight: 600; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .streamlit-expanderContent { background-color: #13161D; border-radius: 0 0 8px 8px; padding: 24px; border: 1px solid rgba(255, 255, 255, 0.1); border-top: none; }
     
-    /* Custom Colors for Metrics */
-    .profit-green { color: #00E676 !important; }
-    .loss-red { color: #FF1744 !important; }
+    /* Custom Profit/Loss Boxes */
+    .profit-box { background: rgba(0, 230, 118, 0.1); border: 1px solid #00E676; padding: 20px; border-radius: 12px; color: #00E676; font-size: 1.1em; display: flex; align-items: center; }
+    .loss-box { background: rgba(255, 23, 68, 0.1); border: 1px solid #FF1744; padding: 20px; border-radius: 12px; color: #FF1744; font-size: 1.1em; display: flex; align-items: center; }
+    .box-icon { font-size: 1.8em; margin-right: 15px; }
 </style>
 """, unsafe_allow_html=True)
 
 # --- HEADER ---
-c1, c2, c3 = st.columns([1, 3, 1])
+c1, c2, c3 = st.columns([1, 4, 2])
 with c1:
-    # Placeholder for Cybercab Image - replace with actual URL if you have one
-    st.image("https://upload.wikimedia.org/wikipedia/commons/e/e8/Tesla_logo.png", width=100)
+    # Official Tesla Logo
+    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Tesla_Motors.svg/800px-Tesla_Motors.svg.png", width=100)
 with c2:
     st.markdown("<h1><span>Cybercab</span> Fleet Commander</h1>", unsafe_allow_html=True)
-    st.markdown("### The Business of Autonomous Mobility")
+    st.markdown("### The Business Model of Autonomous Mobility")
 with c3:
-    # Using a placeholder image that looks like a futuristic car concept
-    st.image("https://i.imgur.com/8p2R4qg.png", width=200) 
+    # Public domain image of Cybertruck (closest proxy)
+    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Tesla_Cybertruck_Franz_von_Holzhausen.jpg/640px-Tesla_Cybertruck_Franz_von_Holzhausen.jpg", width=250)
 
 st.divider()
 
 # --- SIDEBAR: CONTROL CENTER ---
 with st.sidebar:
     st.header("🎛️ Fleet Controls")
+    st.caption("Adjust inputs to model your fleet's profitability.")
     
     # 1. Fleet Scale
     with st.expander("📈 Fleet Scale", expanded=True):
         num_cars = st.number_input("Number of Cybercabs", value=1, min_value=1, step=1, 
-            help="Multiplies all CapEx, OpEx, and Revenue.")
+            help="Multiplies all Capital, Operating, and Revenue figures.")
 
     # 2. Revenue Drivers
     with st.expander("💰 Revenue Assumptions", expanded=True):
         price_per_mile = st.slider("Price Charged ($/mi)", 0.50, 3.50, 1.60, step=0.10,
-            help="Uber is ~$2.50. Robotaxi target is $1.00-$2.00.")
+            help="Current Uber avg is ~$2.50. Robotaxi target is $1.00-$2.00.")
         paid_utilization = st.slider("Paid Utilization (%)", 20, 80, 55, step=5,
             help="% of time car has a paying passenger. Uber avg is 50-60%.")
         hours_active = st.slider("Hours Online / Day", 8, 24, 16, step=2,
-            help="Total time car is available for jobs (includes deadhead).")
+            help="Total time car is available for jobs (includes deadhead & charging).")
 
     # 3. The Tesla Cut
     with st.expander("🤝 Platform Fees", expanded=True):
@@ -161,18 +168,25 @@ kpi2.metric("Total Fleet Costs", f"${fleet_total_costs:,.0f}", "OpEx + Debt Paym
 kpi3.metric("Total Miles Driven", f"{fleet_total_miles:,.0f}", f"{(deadhead_miles_mo_per_car*num_cars):,.0f} Empty")
 kpi4.metric("Net Fleet Cash Flow", f"${fleet_cash_flow:,.0f}", delta_color="normal" if fleet_cash_flow > 0 else "inverse")
 
+st.write("") # Spacer
+
 if fleet_cash_flow > 0:
-    st.markdown(f"""<div style='background-color: rgba(0, 230, 118, 0.1); border: 1px solid #00E676; padding: 15px; border-radius: 8px; color: #00E676;'>
-        ✅ <strong>Generating Cash:</strong> Your fleet is producing <span style='font-size: 1.2em;'><strong>${fleet_cash_flow*12:,.0f}</strong></span> in annual profit (pre-tax).</div>""", unsafe_allow_html=True)
+    st.markdown(f"""<div class='profit-box'>
+        <span class='box-icon'>✅</span>
+        <div><strong>Generating Cash:</strong> Your fleet is producing <span style='font-size: 1.2em; font-weight: 700;'>${fleet_cash_flow*12:,.0f}</span> in annual profit (pre-tax).</div>
+    </div>""", unsafe_allow_html=True)
 else:
-    st.markdown(f"""<div style='background-color: rgba(255, 23, 68, 0.1); border: 1px solid #FF1744; padding: 15px; border-radius: 8px; color: #FF1744;'>
-        ⚠️ <strong>Burning Cash:</strong> Your fleet is losing <span style='font-size: 1.2em;'><strong>${abs(fleet_cash_flow):,.0f}</strong></span> per month. Adjust pricing or utilization.</div>""", unsafe_allow_html=True)
+    st.markdown(f"""<div class='loss-box'>
+        <span class='box-icon'>⚠️</span>
+        <div><strong>Burning Cash:</strong> Your fleet is losing <span style='font-size: 1.2em; font-weight: 700;'>${abs(fleet_cash_flow):,.0f}</span> per month. Adjust pricing or utilization.</div>
+    </div>""", unsafe_allow_html=True)
 
 # 2. Visual Breakdown & Sensitivity
+st.markdown("---")
 c_viz, c_sens = st.columns([1, 1])
 
 with c_viz:
-    st.subheader("💸 Per-Car Unit Economics")
+    st.subheader("💸 Where does the money go? (Single Car)")
     # Sankey Waterfall
     fig_waterfall = go.Figure(go.Waterfall(
         name = "20", orientation = "v",
@@ -186,7 +200,7 @@ with c_viz:
         increasing = {"marker":{"color":"#00E676"}},
         totals = {"marker":{"color":"#2196F3"}}
     ))
-    fig_waterfall.update_layout(title="Where does the money go? (Single Car)", template="plotly_dark", height=400, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font={'color': '#e0e0e0'})
+    fig_waterfall.update_layout(template="plotly_dark", height=450, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font={'color': '#e0e0e0', 'family': 'Inter'})
     st.plotly_chart(fig_waterfall, use_container_width=True)
 
 with c_sens:
@@ -212,12 +226,12 @@ with c_sens:
 
     fig_heat = go.Figure(data=go.Heatmap(
         z=z_data, x=[f"{x}%" for x in x_util], y=[f"${y:.2f}" for y in y_price],
-        colorscale='RdBu', zmid=0, texttemplate="$%{z:.0f}", textfont={"size":10}
+        colorscale='RdBu', zmid=0, texttemplate="$%{z:.0f}", textfont={"size":11, "family": "Inter"}
     ))
     fig_heat.update_layout(
         xaxis_title="Paid Utilization %", yaxis_title="Price per Mile",
-        template="plotly_dark", height=400, margin=dict(l=0, r=0, t=30, b=0),
-        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font={'color': '#e0e0e0'}
+        template="plotly_dark", height=450, margin=dict(l=0, r=0, t=30, b=0),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font={'color': '#e0e0e0', 'family': 'Inter'}
     )
     st.plotly_chart(fig_heat, use_container_width=True)
 
