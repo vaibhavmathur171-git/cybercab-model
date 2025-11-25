@@ -89,12 +89,23 @@ with st.sidebar:
         energy_cost = st.number_input("Energy ($/mi)", value=0.08, format="%.2f", step=0.01,
             help="Mix of home charging ($0.15/kWh) and Supercharging ($0.35/kWh).")
 
-    # 5. Capital Costs
-    with st.expander("🏦 Loan & CapEx (Per Car)", expanded=False):
+    # 5. Capital Costs (UPDATED SECTION)
+    with st.expander("🏦 Loan & CapEx (Per Car)", expanded=True):
         car_price = st.number_input("Vehicle Price ($)", value=29000, step=1000)
         down_payment = st.number_input("Down Payment ($)", value=5000, step=500)
-        loan_rate = st.number_input("Interest Rate (%)", value=7.5, step=0.5) / 100
+        loan_rate_input = st.number_input("Interest Rate (%)", value=7.5, step=0.5)
         loan_months = st.selectbox("Loan Term (Months)", [36, 48, 60, 72], index=2)
+        
+        # --- IMMEDIATE LOAN CALCULATION FOR DISPLAY ---
+        loan_p_disp = car_price - down_payment
+        m_rate_disp = (loan_rate_input / 100) / 12
+        if loan_rate_input > 0:
+            m_debt_disp = loan_p_disp * (m_rate_disp * (1 + m_rate_disp) ** loan_months) / ((1 + m_rate_disp) ** loan_months - 1)
+        else:
+            m_debt_disp = loan_p_disp / loan_months
+        
+        st.metric("Est. Monthly Payment", f"${m_debt_disp:,.0f}", help="Principal + Interest based on the inputs above.")
+        # ----------------------------------------------
 
 # --- LOGIC ENGINE ---
 # Physics
@@ -114,9 +125,11 @@ net_rev_car = gross_rev_car - platform_cut_car
 var_opex_car = total_miles_mo_per_car * (tire_cost + energy_cost)
 fixed_opex_car = cleaning_budget + insurance_cost + remote_intervention
 
+# Loan Calculation for final model
 loan_principal = car_price - down_payment
-monthly_rate = loan_rate / 12
-if loan_rate > 0:
+loan_rate_final = loan_rate_input / 100
+monthly_rate = loan_rate_final / 12
+if loan_rate_final > 0:
     monthly_debt_car = loan_principal * (monthly_rate * (1 + monthly_rate) ** loan_months) / ((1 + monthly_rate) ** loan_months - 1)
 else:
     monthly_debt_car = loan_principal / loan_months
@@ -135,13 +148,13 @@ fleet_total_miles = total_miles_mo_per_car * num_cars
 # 1. The Big Picture (Fleet KPIs)
 st.header("📊 Fleet Performance (Monthly)")
 kpi1, kpi2, kpi3, kpi4 = st.columns(4)
-kpi1.metric("Fleet Net Revenue", f"${fleet_net_revenue:,.0f}", f"{num_cars} Cars")
-kpi2.metric("Total Fleet Costs", f"${fleet_total_costs:,.0f}", "OpEx + Debt")
+kpi1.metric("Fleet Net Revenue", f"${fleet_net_revenue:,.0f}", f"{num_cars} Cars", help="Revenue after Tesla takes their cut.")
+kpi2.metric("Total Fleet Costs", f"${fleet_total_costs:,.0f}", "OpEx + Debt Payments", help="Includes Energy, Tires, Insurance, Cleaning, and Loan Payments.")
 kpi3.metric("Total Miles Driven", f"{fleet_total_miles:,.0f}", f"{(deadhead_miles_mo_per_car*num_cars):,.0f} Empty")
 kpi4.metric("Net Fleet Cash Flow", f"${fleet_cash_flow:,.0f}", delta_color="normal" if fleet_cash_flow > 0 else "inverse")
 
 if fleet_cash_flow > 0:
-    st.success(f"✅ **Generating Cash:** Your fleet is producing **${fleet_cash_flow*12:,.0f}** in annual profit.")
+    st.success(f"✅ **Generating Cash:** Your fleet is producing **${fleet_cash_flow*12:,.0f}** in annual profit (pre-tax).")
 else:
     st.error(f"⚠️ **Burning Cash:** Your fleet is losing **${abs(fleet_cash_flow):,.0f}** per month. Adjust pricing or utilization.")
 
